@@ -133,3 +133,30 @@ body.modo-oscuro .chip-participante {
 body.modo-oscuro .sin-participantes {
     color: #666;
 }
+
+.btn-github-gradient {
+    background: linear-gradient(135deg, #24292e 0%, #2ea44f 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 25px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.btn-github-gradient:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(46, 164, 79, 0.4);
+    color: white;
+}
+
+/* Asegurar que el ícono se vea bien en modo oscuro */
+body.modo-oscuro .btn-outline-dark {
+    border-color: #e0e0e0;
+    color: #e0e0e0;
+}
+
+body.modo-oscuro .btn-outline-dark:hover {
+    background-color: #e0e0e0;
+    color: #1a1a1a;
+}
