@@ -29,7 +29,7 @@ body.modo-oscuro .pista-contenedor {
 
 .carril:last-child {
     border-bottom: none;
-    margin-bottom: 0;
+    margin-bottom: -15px;
 }
 
 body.modo-oscuro .carril {
@@ -107,7 +107,6 @@ body.modo-oscuro .chip-participante {
     opacity: 1;
 }
 
-/* OPCIÓN 2: Moderno (degradado azul/morado) */
 .cuadro-ganador {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     border: none;
@@ -150,7 +149,6 @@ body.modo-oscuro .sin-participantes {
     color: white;
 }
 
-/* Asegurar que el ícono se vea bien en modo oscuro */
 body.modo-oscuro .btn-outline-dark {
     border-color: #e0e0e0;
     color: #e0e0e0;
@@ -159,4 +157,40 @@ body.modo-oscuro .btn-outline-dark {
 body.modo-oscuro .btn-outline-dark:hover {
     background-color: #e0e0e0;
     color: #1a1a1a;
+}
+
+.mensaje-boost {
+    position: absolute;
+    top: -40px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 100;
+    animation: boostAnimation 2s ease-out forwards;
+    pointer-events: none;
+    text-align: center;
+}
+
+@keyframes boostAnimation {
+    0% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(20px) scale(0.5);
+    }
+
+    20% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0) scale(1.2);
+    }
+
+    40% {
+        transform: translateX(-50%) translateY(0) scale(1);
+    }
+
+    80% {
+        opacity: 1;
+    }
+
+    100% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-10px) scale(0.9);
+    }
 }
