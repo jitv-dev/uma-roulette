@@ -17,15 +17,12 @@ const spritesDisponibles = [
     'caballo5.gif', 'caballo6.gif', 'caballo7.gif', 'caballo8.gif'
 ];
 
-// Mezclar sprites al cargar
 let spritesRestantes = [...spritesDisponibles].sort(() => Math.random() - 0.5);
 
 function obtenerSpriteUnico() {
-    // Si no quedan sprites, volver a mezclar
     if (spritesRestantes.length === 0) {
         spritesRestantes = [...spritesDisponibles].sort(() => Math.random() - 0.5);
     }
-    // Sacar el primero disponible
     return spritesRestantes.shift();
 }
 
@@ -81,10 +78,7 @@ function eliminarParticipante(idParticipante) {
     const participante = participantes.find(p => p.id === idParticipante);
 
     if (participante) {
-        // Devolver el sprite al pool
         spritesRestantes.push(participante.sprite);
-
-        // Eliminar participante
         participantes = participantes.filter(p => p.id !== idParticipante);
 
         actualizarLista();
@@ -139,17 +133,60 @@ function iniciarCarrera() {
 
     participantes.forEach(p => {
         p.progreso = 0;
+        p.enRemontada = false;
+        p.yaRemonto = false;
     });
 
     actualizarPista();
     botonIniciar.disabled = true;
 
+    let ticksTranscurridos = 0;
+
     intervaloCarrera = setInterval(() => {
         let hayGanador = false;
+        ticksTranscurridos++;
 
         participantes.forEach((p, i) => {
             if (!hayGanador) {
-                p.progreso += Math.random() * 2.5 + 1;
+                // Velocidad completamente aleatoria cada tick
+                let incremento = Math.random() * 1.5 + 0.5;
+
+                // Mini-boosts ocasionales
+                if (Math.random() < 0.08) {
+                    incremento *= 1.5;
+                }
+
+                // Remontada épica
+                if (!p.enRemontada && !p.yaRemonto && ticksTranscurridos > 25 && Math.random() < 0.002) {
+                    const progresoMax = Math.max(...participantes.map(x => x.progreso));
+                    const todosLosProgresos = participantes.map(x => x.progreso).sort((a, b) => b - a);
+                    const posicion = todosLosProgresos.indexOf(p.progreso) + 1;
+                    const totalParticipantes = participantes.length;
+
+                    if ((posicion > totalParticipantes - 3 || p.progreso < progresoMax - 8) &&
+                        p.progreso > 20 &&
+                        p.progreso < 65) {
+
+                        p.enRemontada = true;
+                        p.yaRemonto = true;
+                        p.ticksRemontada = Math.floor(Math.random() * 18) + 15;
+                        elementosCaballos[i].style.filter = 'brightness(1.5) saturate(1.3) drop-shadow(0 0 12px gold)';
+
+                        mostrarMensajeBoost(i, p.nombre);
+                    }
+                }
+
+                if (p.enRemontada) {
+                    incremento *= 2.5;
+                    p.ticksRemontada--;
+
+                    if (p.ticksRemontada <= 0) {
+                        p.enRemontada = false;
+                        elementosCaballos[i].style.filter = '';
+                    }
+                }
+
+                p.progreso += Math.max(0.4, incremento);
 
                 const porcentaje = Math.min(p.progreso, 95);
                 elementosCaballos[i].style.left = porcentaje + '%';
@@ -163,12 +200,11 @@ function iniciarCarrera() {
 
         if (hayGanador) {
             clearInterval(intervaloCarrera);
+            elementosCaballos.forEach(el => el.style.filter = '');
 
-            // Hacer que el ganador avance un poco más
             const indiceGanador = participantes.indexOf(ganadorActual);
             elementosCaballos[indiceGanador].style.left = '98%';
 
-            // Mostrar ganador después de una pequeña pausa
             setTimeout(() => {
                 mostrarGanador();
             }, 300);
@@ -196,9 +232,7 @@ function mostrarGanador() {
 }
 
 function eliminarGanador() {
-    // Devolver el sprite al pool cuando se elimina un participante
     spritesRestantes.push(ganadorActual.sprite);
-
     participantes = participantes.filter(p => p.id !== ganadorActual.id);
     ganadorActual = null;
 
@@ -217,11 +251,33 @@ function reintentar() {
     actualizarPista();
 }
 
+function mostrarMensajeBoost(indice, nombre) {
+    const carril = pistaCarreras.children[indice];
+
+    const mensajeBoost = document.createElement('div');
+    mensajeBoost.className = 'mensaje-boost';
+    mensajeBoost.innerHTML = `
+        <span style="font-size: 24px; font-weight: bold; color: gold; text-shadow: 0 0 10px rgba(255, 215, 0, 0.8);">
+            ⚡ BOOST! ⚡
+        </span>
+        <div style="font-size: 14px; color: #ffd700; margin-top: 5px;">
+            ${nombre} acelera!
+        </div>
+    `;
+
+    carril.appendChild(mensajeBoost);
+
+    setTimeout(() => {
+        if (mensajeBoost.parentNode) {
+            mensajeBoost.remove();
+        }
+    }, 2000);
+}
+
 function cambiarTema() {
     document.body.classList.toggle('modo-oscuro');
 }
 
-// Eventos
 botonAgregar.addEventListener('click', agregarParticipante);
 
 inputNombre.addEventListener('keypress', (e) => {
